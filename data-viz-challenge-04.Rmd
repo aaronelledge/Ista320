@@ -1,0 +1,121 @@
+---
+title: "ISTA 320 Data Visualization Challenge 04"
+author: "Aaron Elledge"
+date: "Spring 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+opts_chunk$set(echo = TRUE)
+```
+
+For this data viz challenge, you will be working with the same netflix data from [D2L's Barplots Case Study 1 - Netflix Movies and TV Shows](https://d2l.arizona.edu/d2l/le/content/998080/viewContent/10387262/View).
+
+# Read and inspect the data
+
+The data file (in csv format) is inside the `data` folder in this project. Read and inspect the data.
+
+```{r}
+netflix <- read.csv("data/netflix_titles.csv")
+view(netflix)
+```
+
+# Data analysis
+
+> Question 1: What is the two most common ratings (i.e., `rating` variable) for the movies and TV shows in this dataset?
+
+Suggestions on how to answer this question: 
+
+1. draw a barplot (using `geom_bar`) mapping `x` to `rating`. Add another categorical variable to the plot, mapping `fill` to `type`.
+2. draw a barplot (using `geom_col`) mapping `x` to `rating`. Add another categorical variable to the plot, mapping `fill` to `type`. Reorder the ratings using `reorder()`
+
+I will consider this item done if you draw any of the two (or alternative both) barplots suggested above.
+
+```{r}
+# 1 
+netflix %>%
+  ggplot(aes(x = rating, fill = type))+
+  geom_bar()
+
+
+```
+
+
+TYPE YOUR ANSWER TO THE FIRST QUESTION (i.e., your interpretation of the barplot you produced) HERE -- The two most common ratings for movies and TV shows is TV-14 and TV-MA.
+
+> Question 2: What is the most common duration (in seasons) for TV shows?
+
+Suggestion of steps for how to answer this question: 
+
+1. Filter the data to keep only `TV Show` for `type`.
+2. Draw a barplot (using `geom_bar`) mapping `duration` to one of the axes (either `y` or `x`, whatever you find easier to visualize). 
+3. Ensure the bars are ordered in a way that makes sense for the `duration` variable (ascending or descending order, from left to right, your choice here)
+
+I will consider this item done if implement all three items above.
+
+
+```{r}
+
+netflix_tv <- netflix %>% 
+  filter(type == 'TV Show')
+
+netflix_tv %>% 
+  ggplot(aes(y = duration)) +
+geom_bar()
+
+
+
+
+#netflix_tv <- netflix %>%
+#  filter(type == 'Tv Show')
+#netflix_tv %>%
+#  mutate(duration = factor(duration, levels = c("1 Season",
+ #                                       "2 Seasons",
+ #                                       "3 Seasons",
+ #                                        "4 Seasons",
+ #                                       "5 Seasons",
+ #                                       "6 Seasons",
+ #                                       "7 Seasons",
+ #                                       "8 Seasons",
+ #                                       "9 Seasons",
+ #                                       "10 Seasons",
+ #                                       "11 Seasons",
+ #                                       "12 Seasons"))) %>%
+#  ggplot(aes(x = duration,
+ #            fill = type)) +
+#  geom_bar()
+
+
+```
+
+TYPE YOUR ANSWER TO THE SECOND QUESTION (i.e., your interpretation of the barplot you produced) HERE -- After interprtating the graph, I can see that majority of the shows aired are 1 Season by a long shot. The number of shows with more seasons goes down every season. 
+
+> Question 3: What is the average duration in minutes of movies across different ratings in the data set.
+## TV-MA has the highest average duration in minutes of movies, then TV-14 comes next than R movies are third. 
+
+1. Filter the data to keep only `Movie` for `type`.
+1. Mutate duration so it is a number (this step is done for you in the R chunk below)
+1. Summarize `mean_duration` by `rating`
+1. Draw a barplot (using `geom_col`) `mean_duration` to `y` and `rating` to `x`
+1. Order the ratings so that they are in an order that makes it easier to read the plot (hint: not the default alphabetical order)
+
+I will consider this item done if implement all items above.
+
+```{r}
+netflix_movie_data <- netflix %>%
+  filter(type == 'Movie') %>% 
+  mutate(duration = parse_number(duration))
+
+# no need to change this line
+
+netflix_movie_data %>%
+  group_by(rating) %>%
+  summarize(mean_duration = rating) %>%
+  ggplot(aes(y = mean_duration,
+             x = rating)) +
+  geom_col()
+```
+
+

@@ -1,0 +1,73 @@
+---
+title: "ISTA 320 Data Visualization Challenge 03"
+author: "Aaron Elledge "
+date: "Spring 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+opts_chunk$set(echo = TRUE)
+
+```
+
+We will be working with the same flight data that I created the tutorials and demonstration video for this module. We will be working with data from 2009 and 2018.
+
+# Read data in
+
+There are two data files (`csv` format) inside the data folder in this project. Read both files (using `read_csv()`), and combine them into one data frame (using `bind_rows()`). Mutate the year variable so it is a factor (and not a numerical variable).
+
+
+```{r}
+
+
+# read data in
+flight_delays_data_2009 <- read_csv("data/2009.csv")
+flight_delays_data_2018 <- read_csv("data/2018.csv")
+
+# combine data
+flight_delay_data_2009_2018 <- bind_rows(flight_delays_data_2009, flight_delays_data_2018)
+
+# inspect data
+glimpse(flight_delay_data_2009_2018)
+
+# mutate year so year is a factor
+flight_delay_data_2009_2018 <- flight_delay_data_2009_2018 %>%
+  mutate(year = as.factor(year))
+
+
+view(flight_delay_data_2009_2018)
+```
+
+# Scatterplots
+
+> QUESTION 1: What's the relationship between mean arrival delay time and mean departure delay time? These two variables are in minutes.
+
+## The relationship between mean arrival delay time and mean departure delay time is extremely close. They only have about a 3 minute difference.
+
+> QUESTION 2: Is this relationship similar across the two years in the data?
+
+## Yes the relationship is similar between 2009 and 2018. It is a good correlation because there are no real outliers or no major skew.
+
+To answer these two questions, draw a scatterplot mapping the numerical variables to the axes and the categorical variable to color.
+
+```{r}
+flight_delay_data_2009_2018 %>%
+  ggplot(aes(x = mean_arrival_delay, y = mean_departure_delay, color = year)) +
+geom_point()
+```
+
+> QUESTION 3: Is there a relationship between mean distance of the flight and mean arrival delay?
+
+## There is no relationship between mean distance and mean arrival delay. Too many outliers, no solid points going along the correlation line as well.
+
+To answer this question, draw a scatterplot with the two numerical variables mentioned in the question. You can optionally run correlation or linear regression with these two variables to answer this question as well (in addition to the scatterplot).
+
+```{r}
+flight_delay_data_2009_2018 %>%
+  ggplot(aes(x = mean_distance, y = mean_arrival_delay)) +
+geom_point() +
+  geom_smooth(method = "lm")
+```
+

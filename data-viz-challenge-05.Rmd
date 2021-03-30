@@ -1,0 +1,135 @@
+---
+title: "ISTA 320 Data Visualization Challenge 05"
+author: "Aaron Elledge"
+date: "Spring 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(echo = TRUE)
+```
+
+For this data viz challenge, you will be working with the same dataset as the [Line Plots Case Study -- 2016 Advanced Placement Classes Part 1](), which was downloaded from [2016 Advanced Placement Exam Scores](https://www.kaggle.com/collegeboard/ap-scores?select=exams.csv)
+
+
+# Data Wrangling Part 1
+
+In the next code block, make sure you:
+
+1. load the `tidyverse` library
+1. read "data/exams.csv" in using `read_csv()`
+1. inspect data to get an idea of what it looks like
+
+```{r}
+
+library(tidyverse)
+exams <- read_csv("data/exams.csv")
+glimpse(exams)
+view(exams)
+```
+
+# Data Visualization 1
+
+> Question 1: How many students, from `All Students (2016)` (i.e., from all the students that took AP exams in 2016), got each score (from 1 to 5) across different exam subjects.
+
+1. start with the object you created when you `read_csv()`
+1. filter out Scores that are "All" and "Average" (keep scores that are from 1 to 5)
+1. start a ggplot with the following in mind: score is your sequential variable, `All Students (2016)` is your numeric variable (with student counts), and `Exam Subject` is your categorical variable.
+1. use `geom_line` to draw a line plot
+1. make any other adjustments to make your plot clearer (e.g., use `facet_wrap`, change scales, add a caption)
+
+```{r fig.height=20}
+exams_score <- exams %>%
+  filter(Score < 6)
+#view(exams_score)
+
+exams_score <- exams_score %>%
+  select(`Exam Subject`, Score , `All Students (2016)`)
+#view(exams_score)
+
+exams_score %>%
+  ggplot(aes(x = factor(Score),
+             y = `All Students (2016)`),
+         group = `Exam Subject`) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ `Exam Subject`, ncol = 3,
+             scales = "free")
+labs(caption = "How Many Students from 2016 got scores 1-5 for each Subject") +
+  scale_y_continuous(expand = expansion(mult = c(.5,.5))) +
+  theme(strip.text = element_text(size = 6))
+
+```
+
+# Data Wrangling Part 2
+
+> Question 2: What is the distribution of Average scores across exam subjects and gender (male vs. female)?
+
+First, create a new dataframe with exam subject and average scores for male and female students. 
+
+First you need to filter your original data to keep Score that is equal to "Average" only -- when you do, you are keeping rows that diplay average scores only (instead of student counts).
+
+Then use `select()` to keep the following columns:
+
+- `Exam Subject`
+- `Students (Male)`
+- `Students (Female)`
+
+```{r}
+# create a new data frame that holds the results of:
+# start with the original data you read through read_csv and then
+# filter the data to keep only Score that is equal to "Average" and then
+# select Exam Subject, Students (Male), and Students (Female) 
+# (remember to use back tick for column names inside select())
+exams_score <- exams %>%
+  filter(Score == "Average")
+#view(exams_score)
+
+gender <- exams_score %>%
+  select(`Exam Subject`, `Students (Male)`, `Students (Female)`)
+view(gender)
+
+
+```
+
+Create a pivoted dataframe, starting with the selected dataframe you just created, and `pivot_longer()` the columns "Students (Male)" and "Students (Female)". Make any changes to the new gender column (e.g., clean it up so it only says "male" or "female").
+
+```{r}
+gender_avg <- gender %>%
+  pivot_longer(cols = c(`Students (Male)`,
+                        `Students (Female)`),
+               names_to = c("gender"))
+
+gender_avg <- gender_avg %>%
+  mutate(gender = gsub("Students \\(|\\)", "", gender))
+
+gender_avg %>%
+  head()
+
+
+```
+You should now have a tidy dataframe with the following three variables: exam subject, gender, and average score.
+
+# Data Visualization 2
+
+To answer question 2, plot a line plot of "Average" scores by student count, across gender:
+
+1. start with the tidy dataframe you created in the previous section
+1. start a ggplot with the following in mind: gender is your "sequential" variable, your average score is your numeric variable, and `Exam Subject` is your categorical variable for group mapping.
+1. use `geom_line` to draw a line plot
+1. use `facet_wrap` to split your plot in subplots by `Exam Subject`
+1. make any other adjustments to make your plot clearer (e.g., add a caption, change number of columns in your facet_wrap, add geom_label)
+
+
+```{r fig.height=30}
+
+gender_avg %>%
+  ggplot(aes(x = factor(gender), y = value, group = `Exam Subject`)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ `Exam Subject`, ncol = 3, scales = "free") +
+  labs(caption = "Average scores by student count across gender") +
+  scale_y_continuous(expand = expansion(mult = c(.5,.5)))
+```
+

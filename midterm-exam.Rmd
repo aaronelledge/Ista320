@@ -1,0 +1,177 @@
+---
+title: "ISTA 320 Spring 2021 Midterm Exam"
+author: "Aaron Elledge"
+date: "Spring 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+opts_chunk$set(echo = TRUE)
+```
+
+
+# Part 1 -- COVID-19 Vaccine Distribution Allocation by Jurisdiction (50 points total)
+
+For this part of the midterm exam, you will be working with data from [Data.CDV.gov](https://data.cdc.gov/browse?category=Vaccinations) on COVID-19 Vaccine Distribution Allocation by Jurisdiction for both Pfizer and Moderna vaccines.
+
+## Read Data In (15 points)
+
+There are two `COVID-19` csv files in the data folder in this project. 
+
+- Read both files (5 points)
+- Create a new `vaccine` column for each of the two dataframes (with the value "Pfizer" for the Pfizer dataframe and the value "Moderna" for the Moderna dataframe) (5 points)
+- Combine the two dataframes into one dataframe object (5 points)
+
+```{r}
+moderna19 <- read_csv("data/COVID-19_Vaccine_Distribution_Allocations_by_Jurisdiction_-_Moderna.csv")
+
+pfizer19 <- read_csv("data/COVID-19_Vaccine_Distribution_Allocations_by_Jurisdiction_-_Pfizer.csv")
+
+moderna19$vaccine <- ('Moderna')
+glimpse(moderna19)
+
+pfizer19$vaccine <- ('Pfizer')
+glimpse(pfizer19)
+
+covid_moderna_pfizer <- bind_rows(pfizer19, moderna19)
+glimpse(covid_moderna_pfizer)
+
+
+```
+
+
+## Data Wrangling (10 points)
+
+Pivot the `1st Dose Allocations` and `2nd Dose Allocations` columns in your all-vaccines dataframe to create a new dataframe that contains 5 variables: (10 points)
+
+1) Jurisdiction
+1) Week of Allocations
+1) vaccine type (Pfizer and Moderna)
+1) dose type (first and second dose)
+1) and allocation count. 
+
+HINT: use pivot_longer()
+
+```{r}
+
+covid_longer <- covid_moderna_pfizer %>%
+  pivot_longer(cols = c(`1st Dose Allocations`, `2nd Dose Allocations`),
+                        names_to = "dose type",
+                        values_to = "allocation count")
+head(covid_longer)
+glimpse(covid_longer)
+
+
+```
+
+
+## Data Analysis (25 points)
+
+> Question: What is the total number of vaccine doses allocated by vaccine type (Pfizer vs. Moderna) and by dose (1st vs 2nd dose).
+
+I will consider this question complete if you follow all of the steps:
+
+1) summarize the total (use sum) number of allocations by vaccine and dose (10 points)
+1) draw a plot mapping dose type (1st vs 2nd) to x and total number of allocations to y and vaccine manufacturer to color/fill (10 points)
+
+The type of plot (line or bar plot) is up to you.
+
+```{r}
+
+covid_longer_sum <- covid_longer %>%
+  group_by(vaccine, `dose type`) %>%
+  summarise(total = sum(`allocation count`))
+
+head(covid_longer_sum)
+
+
+covid_longer_sum %>%
+  ggplot(aes(x = `dose type`,
+             y = `total`,
+             fill = vaccine)) +
+  geom_col(position = "dodge")
+
+```
+
+QUESTIONS TO ANSWER ABOUT PLOT (you have to type in your answers): 
+
+1) Which manufacturer has allocated more vaccine shots in the US? (2.5 points)
+1) Which dose (1st or 2nd) has had more allocations in the US? (2.5 points)
+
+# Part 2 -- Unemployment Rates in the US 2019-2021 (50 points total)
+
+In this second part of the midterm exam, you will be working with unemployment in the US data from [BLS Beta Labs](https://beta.bls.gov/dataQuery/find?q=unemployment).
+
+## Read Data In (10 points)
+
+There are four csv files inside a folder called `unemployment` inside the `data` folder in this project. 
+
+1) Read all four file in, making sure you keep the filename as a variable for race-ethnic-cultural (Asian, Black, Hispanic or Latino, and White). (10 points)
+
+```{r}
+
+asian <- read_csv("data/unemployment/asian.csv")
+black <- read_csv("data/unemployment/black.csv")
+hispanic <- read_csv("data/unemployment/black.csv")
+white <- read_csv("data/unemployment/white.csv")
+
+asian <- asian %>%
+  mutate(race = 'asian')
+black <- black %>%
+  mutate(race = 'black')
+hispanic <- hispanic %>%
+  mutate(race = 'hispanic')
+white <- white %>%
+  mutate(race = 'white')
+ glimpse(asian)
+
+ unemployment <- bind_rows(asian, black, hispanic, white)
+ 
+ unemployment <- unemployment %>%
+   mutate(Period = parse_number(Period))
+ 
+ glimpse(unemployment)
+
+
+```
+
+
+## Data Analysis (40 points)
+
+> Question: What is the unemployment rate across race/ethnicity in the US for the years of 2019-2021?
+
+I will consider this question complete if you follow all of the steps:
+
+1) summarize mean unemployment rate by Period, Year and race/ethnicity (10 points)
+1) draw a line plot mapping x to month (i.e., Period), y to mean unemployment (calculated in the previous step), and color to race/ethnicity. Facet your plot by Year. (20 points)
+
+
+Option steps before plotting: 
+1) mutate Period so it's a number (it will make the plot easier to read)
+1) move the legend to the bottom of the plot (the default position of the legend is to the right of the plot)
+
+```{r}
+
+unemployment <- unemployment %>%
+  group_by(Year,Period,race) %>%
+  summarise(value = mean(Value))
+
+glimpse(unemployment)
+
+
+unemployment %>%
+  ggplot(aes(x = Period,y=value, color=race)) +
+  geom_point()+
+  geom_line()+
+  facet_wrap(~`Year`, ncol = 3, scales = 'free')
+```
+
+QUESTIONS TO ANSWER ABOUT PLOT (you have to type in your answers): 
+
+1) What race/ethnicity has the highest unemployment rate in the US in the year of 2019? (2.5 points)
+# In 2019, Hispanics had the highest unemployment rate in the US.
+1) Has the pattern of unemployment changed in 2020? How so? Can you explain the changes? (7.5 points)
+# In 2019, the Hispanics were the outlier of unemployment and had a very high rate and all over races had a very low unemployment rate. In 2020, all races changed around the same time and about the same rate. The pattern changed drastically from 2019 to 2020. All the rates of change are relative in 2020, unlike 2019.
+

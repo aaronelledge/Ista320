@@ -1,0 +1,48 @@
+---
+title: "ISTA 320 Data Visualization Challenge 06"
+author: "Aaron Elledge"
+date: "Spring 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+```
+
+For this data viz challenge, you will be working with the GME (GameStop) stock price dataset from [Yahoo Finance](https://finance.yahoo.com/quote/GME/history?period1=1583193600&period2=1614729600&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true)
+
+The data is inside the `data` folder, and it's called `GME.csv`. Alternatively you can download a more up-to-date version of the data from the link provided above.
+
+```{r}
+dir("data")
+gme <- read.csv("data/GME.csv")
+
+View(gme)
+head(gme)
+
+```
+
+# Read the Data in
+
+```{r}
+# Data Analysis
+
+#Plot a timeseries (i.e., you need to map a `date` variable in your plot).
+
+
+gme %>%
+  ggplot(aes (x = Date,
+             y = Close))+
+  geom_point()+
+  geom_line()
+```
+
+
+```
+
+ENTER YOUR INTEPRETATION OF YOUR PLOT HERE
+
+## My interpretation is the closing prices over time, as it becomes later on the closing prices rise and then drops. Overall, the closing price doesn't change much until later on.
